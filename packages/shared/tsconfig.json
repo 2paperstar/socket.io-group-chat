@@ -9,7 +9,8 @@
     "skipLibCheck": true,
     "outDir": "dist",
     "baseUrl": "./src",
-    "rootDir": "src"
+    "rootDir": "src",
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo"
   },
   "include": ["src"]
 }
