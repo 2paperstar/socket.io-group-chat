@@ -2878,6 +2878,7 @@ __metadata:
     globals: "npm:^15.11.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
+    shared: "workspace:^"
     socket.io-client: "npm:^4.8.1"
     typescript: "npm:~5.6.2"
     typescript-eslint: "npm:^8.11.0"
@@ -6887,6 +6888,14 @@ __metadata:
   checksum: 10c0/68733173026766fa0d9ecaeb07f0483f4c2dc70ca376b3b7c40b7cda909f94b0918f6c5ad5ce27a9160bdfb475efaa9d5e705a11d8eaae18f9835d20976028bc
   languageName: node
   linkType: hard
+
+"shared@workspace:^, shared@workspace:packages/shared":
+  version: 0.0.0-use.local
+  resolution: "shared@workspace:packages/shared"
+  dependencies:
+    typescript: "npm:^5.6.3"
+  languageName: unknown
+  linkType: soft
 
 "shebang-command@npm:^2.0.0":
   version: 2.0.0

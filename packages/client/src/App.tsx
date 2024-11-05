@@ -2,15 +2,22 @@ import { useEffect, useState } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import './App.css';
-import { io } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
+import { ClientToServerEvents, ServerToClientEvents } from 'shared';
 
 function App() {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    const sio = io('http://localhost:3000');
+    const sio: Socket<ServerToClientEvents, ClientToServerEvents> = io(
+      'http://localhost:3000',
+    );
 
     sio.emit('list', console.log);
+    sio.on('created', () => {});
+    return () => {
+      sio.close();
+    };
   }, []);
 
   return (
