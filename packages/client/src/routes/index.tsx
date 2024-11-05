@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { useSocket } from '../hooks/useSocket';
 import { CreateRoomButton } from '../components/CreateRoomButton';
 
@@ -21,12 +21,11 @@ const ListPage = () => {
               <div className="text-lg">{room.name}</div>
               <div className="text-slate-600">{room.description}</div>
             </div>
-            <button
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              onClick={() => {}}
-            >
-              Join
-            </button>
+            <Link to={`/room/${room.id}`}>
+              <button className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                Join
+              </button>
+            </Link>
           </div>
         ))}
       </div>
