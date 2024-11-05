@@ -1,12 +1,18 @@
 import { Room } from 'room.type';
 
+export type RoomCreation = Pick<Room, 'name' | 'description'>;
 export type RoomSummary = Pick<Room, 'id' | 'name' | 'description'>;
 export type ListResponse = RoomSummary[];
 
 export interface ServerToClientEvents {
-  created: (cb: (data: RoomSummary) => void) => void;
+  created: (data: RoomSummary) => void;
 }
 
 export interface ClientToServerEvents {
   list: (cb: (data: ListResponse) => void) => void;
+  create: () => void;
+}
+
+export interface SocketData {
+  userId: string;
 }
