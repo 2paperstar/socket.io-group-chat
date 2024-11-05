@@ -9,6 +9,7 @@ import {
 import {
   ClientToServerEvents,
   ListResponse,
+  RoomCreation,
   ServerToClientEvents,
 } from 'shared';
 import { io, Socket } from 'socket.io-client';
@@ -31,7 +32,11 @@ export const useSocketProvider = () => {
     };
   }, []);
 
-  const createRoom = useCallback(() => {}, []);
+  const createRoom = useCallback((data: RoomCreation) => {
+    sioRef.current?.emit('create', data, (room) =>
+      setRooms((rooms) => [...rooms, room]),
+    );
+  }, []);
 
   return { rooms, createRoom };
 };

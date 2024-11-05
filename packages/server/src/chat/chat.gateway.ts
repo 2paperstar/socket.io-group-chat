@@ -39,6 +39,7 @@ export class ChatGateway {
   @SubscribeMessage('create')
   create(@ConnectedSocket() client: Client, @MessageBody() data: RoomCreation) {
     const room = this.chatRepository.create(client.id, data);
-    this.server.emit('created', room);
+    client.emit('created', room);
+    return room;
   }
 }

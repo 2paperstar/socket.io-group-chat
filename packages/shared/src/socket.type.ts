@@ -10,7 +10,7 @@ export interface ServerToClientEvents {
 
 export interface ClientToServerEvents {
   list: (cb: (data: ListResponse) => void) => void;
-  create: () => void;
+  create: (data: RoomCreation, cb: (data: RoomSummary) => void) => void;
 }
 
 export interface SocketData {
