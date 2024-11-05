@@ -1,11 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import {
-  ConnectedSocket,
-  MessageBody,
-  SubscribeMessage,
-  WebSocketGateway,
-} from '@nestjs/websockets';
-import { Socket } from 'net';
+import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import { ListResponse, Room } from 'shared';
+import { ChatRepository } from './chat.repository';
 
 @WebSocketGateway({
   cors: {
@@ -13,13 +8,10 @@ import { Socket } from 'net';
   },
 })
 export class ChatGateway {
+  constructor(private readonly chatRepository: ChatRepository) {}
+
   @SubscribeMessage('list')
-  list(
-    @ConnectedSocket()
-    client: Socket,
-    @MessageBody()
-    data: any,
-  ): string {
-    return 'Hello world!';
+  list(): ListResponse {
+    return this.chatRepository.list();
   }
 }
