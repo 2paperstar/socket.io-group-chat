@@ -1,7 +1,6 @@
 import {
   ConnectedSocket,
   MessageBody,
-  OnGatewayConnection,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -9,13 +8,12 @@ import {
 import {
   ClientToServerEvents,
   ListResponse,
-  Room,
   RoomCreation,
   ServerToClientEvents,
   SocketData,
 } from 'shared';
+import { Namespace, Socket } from 'socket.io';
 import { ChatRepository } from './chat.repository';
-import { Namespace, Server, Socket } from 'socket.io';
 
 type Client = Socket<
   ClientToServerEvents,
@@ -39,7 +37,7 @@ export class ChatGateway {
   @SubscribeMessage('create')
   create(@ConnectedSocket() client: Client, @MessageBody() data: RoomCreation) {
     const room = this.chatRepository.create(client.id, data);
-    client.emit('created', room);
+    client.broadcast.emit('created', room);
     return room;
   }
 }
