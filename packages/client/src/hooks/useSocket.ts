@@ -19,6 +19,7 @@ export const useSocketProvider = () => {
   const sioRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents>>();
   const [rooms, setRooms] = useState<ListResponse>([]);
   const [messages, setMessages] = useState<Message[]>([]);
+  const currentRoom = useRef<string | null>(null);
 
   useEffect(() => {
     const sio = io('http://localhost:3000');
@@ -26,6 +27,9 @@ export const useSocketProvider = () => {
 
     sio.on('connect', () => {
       sio.emit('list', setRooms);
+      if (currentRoom.current) {
+        sioRef.current?.emit('join', currentRoom.current, setMessages);
+      }
     });
     sio.on('created', (room) => setRooms((rooms) => [...rooms, room]));
 
@@ -41,17 +45,15 @@ export const useSocketProvider = () => {
   }, []);
 
   const joinRoom = useCallback(async (id: string) => {
+    currentRoom.current = id;
     sioRef.current?.on('message', (message) => {
       setMessages((messages) => [...messages, message]);
     });
-    const result = await sioRef.current?.emitWithAck('join', id);
-    if (!result) {
-      return;
-    }
-    setMessages(result);
+    sioRef.current?.emit('join', id, setMessages);
   }, []);
 
   const leaveRoom = useCallback(() => {
+    currentRoom.current = null;
     sioRef.current?.emit('leave');
     sioRef.current?.off('message');
     setMessages([]);
