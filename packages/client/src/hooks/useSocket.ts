@@ -9,6 +9,7 @@ import {
 import {
   ClientToServerEvents,
   ListResponse,
+  Message,
   RoomCreation,
   ServerToClientEvents,
 } from 'shared';
@@ -17,6 +18,7 @@ import { io, Socket } from 'socket.io-client';
 export const useSocketProvider = () => {
   const sioRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents>>();
   const [rooms, setRooms] = useState<ListResponse>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
     const sio = io('http://localhost:3000');
@@ -38,15 +40,30 @@ export const useSocketProvider = () => {
     );
   }, []);
 
-  const joinRoom = useCallback((id: string) => {
-    sioRef.current?.emit('join', id);
+  const joinRoom = useCallback(async (id: string) => {
+    sioRef.current?.on('message', (message) => {
+      setMessages((messages) => [...messages, message]);
+    });
+    const result = await sioRef.current?.emitWithAck('join', id);
+    if (!result) {
+      return;
+    }
+    setMessages(result);
   }, []);
 
   const leaveRoom = useCallback(() => {
     sioRef.current?.emit('leave');
+    sioRef.current?.off('message');
+    setMessages([]);
   }, []);
 
-  return { rooms, createRoom, joinRoom, leaveRoom };
+  const sendMessage = useCallback(async (content: string) => {
+    sioRef.current?.emit('send', content, (message) => {
+      setMessages((messages) => [...messages, message]);
+    });
+  }, []);
+
+  return { rooms, createRoom, joinRoom, leaveRoom, messages, sendMessage };
 };
 
 export const socketContext = createContext<ReturnType<

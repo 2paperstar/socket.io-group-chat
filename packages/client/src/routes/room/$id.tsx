@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 const useRoom = (id: string) => {
-  const { joinRoom, leaveRoom, messages } = useSocket();
+  const { joinRoom, leaveRoom, messages, sendMessage } = useSocket();
 
   useEffect(() => {
     joinRoom(id);
@@ -17,7 +17,7 @@ const useRoom = (id: string) => {
     };
   }, [id]);
 
-  return { id, messages };
+  return { id, messages, sendMessage };
 };
 
 const ChatBubble = (message: Message) => {
@@ -36,13 +36,13 @@ const scheme = z.object({
 
 const ChatRoomPage = () => {
   const { id } = Route.useParams();
-  const { messages } = useRoom(id);
+  const { messages, sendMessage } = useRoom(id);
   const { register, handleSubmit, setValue } = useForm<z.infer<typeof scheme>>({
     resolver: zodResolver(scheme),
   });
 
   const onSend = handleSubmit((data) => {
-    console.log(data);
+    sendMessage(data.content);
     setValue('content', '');
   });
 
@@ -51,7 +51,7 @@ const ChatRoomPage = () => {
       <h1 className="text-2xl font-bold">Chat Room</h1>
       <div className="border border-black flex-1 p-2 flex flex-col gap-2 h-0">
         <div className="flex flex-1 flex-col-reverse border border-black p-2 gap-2 overflow-y-scroll">
-          {messages.map((message) => (
+          {messages.toReversed().map((message) => (
             <ChatBubble key={message.id} {...message} />
           ))}
           <div className="self-center text-gray-400">

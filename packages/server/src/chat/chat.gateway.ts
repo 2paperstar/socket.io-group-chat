@@ -8,11 +8,12 @@ import {
 import {
   ClientToServerEvents,
   ListResponse,
+  Message,
   RoomCreation,
   ServerToClientEvents,
   SocketData,
 } from 'shared';
-import { Namespace, Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { ChatRepository } from './chat.repository';
 
 type Client = Socket<
@@ -27,7 +28,7 @@ export class ChatGateway {
   constructor(private readonly chatRepository: ChatRepository) {}
 
   @WebSocketServer()
-  server: Namespace<ClientToServerEvents, ServerToClientEvents, {}, SocketData>;
+  server: Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>;
 
   @SubscribeMessage('list')
   list(): ListResponse {
@@ -42,8 +43,12 @@ export class ChatGateway {
   }
 
   @SubscribeMessage('join')
-  join(@ConnectedSocket() client: Client, @MessageBody() id: string) {
+  join(
+    @ConnectedSocket() client: Client,
+    @MessageBody() id: string,
+  ): Message[] {
     client.join(`room:${id}`);
+    return this.chatRepository.getMessages(id);
   }
 
   @SubscribeMessage('leave')
@@ -53,5 +58,23 @@ export class ChatGateway {
         client.leave(room);
       }
     });
+  }
+
+  @SubscribeMessage('send')
+  message(
+    @ConnectedSocket() client: Client,
+    @MessageBody() content: string,
+  ): Message {
+    const room = [...client.rooms].find((room) => room.startsWith('room:'));
+    if (!room) {
+      throw new Error('Not in a room');
+    }
+    const message = this.chatRepository.message(
+      client.id,
+      room.slice(5),
+      content,
+    );
+    client.to(room).emit('message', message);
+    return message;
   }
 }
