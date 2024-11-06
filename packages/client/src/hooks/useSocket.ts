@@ -20,12 +20,14 @@ export const useSocketProvider = () => {
   const [rooms, setRooms] = useState<ListResponse>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const currentRoom = useRef<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const sio = io('http://localhost:3000');
     sioRef.current = sio;
 
     sio.on('connect', () => {
+      setUserId(sio.id ?? null);
       sio.emit('list', setRooms);
       if (currentRoom.current) {
         sioRef.current?.emit('join', currentRoom.current, setMessages);
@@ -35,6 +37,7 @@ export const useSocketProvider = () => {
 
     return () => {
       sio.close();
+      setUserId(null);
     };
   }, []);
 
@@ -65,7 +68,15 @@ export const useSocketProvider = () => {
     });
   }, []);
 
-  return { rooms, createRoom, joinRoom, leaveRoom, messages, sendMessage };
+  return {
+    rooms,
+    createRoom,
+    joinRoom,
+    leaveRoom,
+    messages,
+    sendMessage,
+    userId,
+  };
 };
 
 export const socketContext = createContext<ReturnType<

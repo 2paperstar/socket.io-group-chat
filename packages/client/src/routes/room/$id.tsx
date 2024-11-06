@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 const useRoom = (id: string) => {
-  const { joinRoom, leaveRoom, messages, sendMessage } = useSocket();
+  const { joinRoom, leaveRoom, messages, sendMessage, userId } = useSocket();
 
   useEffect(() => {
     joinRoom(id);
@@ -17,12 +17,18 @@ const useRoom = (id: string) => {
     };
   }, [id]);
 
-  return { id, messages, sendMessage };
+  return {
+    id,
+    messages: messages.map((v) => ({ ...v, isMe: v.userId === userId })),
+    sendMessage,
+  };
 };
 
-const ChatBubble = (message: Message) => {
+const ChatBubble = (
+  message: ReturnType<typeof useRoom>['messages'][number],
+) => {
   return (
-    <div className="flex gap-2">
+    <div className={`flex gap-2` + (message.isMe ? ' justify-end' : '')}>
       <div className="bg-blue-200 text-black py-1 px-2 rounded">
         {message.content}
       </div>
