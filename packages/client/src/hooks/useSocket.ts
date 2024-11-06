@@ -38,7 +38,15 @@ export const useSocketProvider = () => {
     );
   }, []);
 
-  return { rooms, createRoom };
+  const joinRoom = useCallback((id: string) => {
+    sioRef.current?.emit('join', id);
+  }, []);
+
+  const leaveRoom = useCallback(() => {
+    sioRef.current?.emit('leave');
+  }, []);
+
+  return { rooms, createRoom, joinRoom, leaveRoom };
 };
 
 export const socketContext = createContext<ReturnType<

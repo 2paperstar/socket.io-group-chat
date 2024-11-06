@@ -11,6 +11,8 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   list: (cb: (data: ListResponse) => void) => void;
   create: (data: RoomCreation, cb: (data: RoomSummary) => void) => void;
+  join: (id: string) => void;
+  leave: () => void;
 }
 
 export interface SocketData {

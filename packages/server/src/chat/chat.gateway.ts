@@ -40,4 +40,18 @@ export class ChatGateway {
     client.broadcast.emit('created', room);
     return room;
   }
+
+  @SubscribeMessage('join')
+  join(@ConnectedSocket() client: Client, @MessageBody() id: string) {
+    client.join(`room:${id}`);
+  }
+
+  @SubscribeMessage('leave')
+  leave(@ConnectedSocket() client: Client) {
+    client.rooms.forEach((room) => {
+      if (room.startsWith('room:')) {
+        client.leave(room);
+      }
+    });
+  }
 }
