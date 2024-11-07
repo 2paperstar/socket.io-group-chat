@@ -18,7 +18,7 @@ import { io, Socket } from 'socket.io-client';
 export const useSocketProvider = () => {
   const sioRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents>>();
   const [rooms, setRooms] = useState<ListResponse>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<(Message | 'joined' | 'left')[]>([]);
   const currentRoom = useRef<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -49,9 +49,15 @@ export const useSocketProvider = () => {
 
   const joinRoom = useCallback(async (id: string) => {
     currentRoom.current = id;
-    sioRef.current?.on('message', (message) => {
-      setMessages((messages) => [...messages, message]);
-    });
+    sioRef.current?.on('message', (message) =>
+      setMessages((messages) => [...messages, message]),
+    );
+    sioRef.current?.on('joined', () =>
+      setMessages((messages) => [...messages, 'joined']),
+    );
+    sioRef.current?.on('left', () =>
+      setMessages((messages) => [...messages, 'left']),
+    );
     sioRef.current?.emit('join', id, setMessages);
   }, []);
 
@@ -59,13 +65,15 @@ export const useSocketProvider = () => {
     currentRoom.current = null;
     sioRef.current?.emit('leave');
     sioRef.current?.off('message');
+    sioRef.current?.off('joined');
+    sioRef.current?.off('left');
     setMessages([]);
   }, []);
 
   const sendMessage = useCallback(async (content: string) => {
-    sioRef.current?.emit('send', content, (message) => {
-      setMessages((messages) => [...messages, message]);
-    });
+    sioRef.current?.emit('send', content, (message) =>
+      setMessages((messages) => [...messages, message]),
+    );
   }, []);
 
   return {

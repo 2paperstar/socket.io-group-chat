@@ -19,13 +19,15 @@ const useRoom = (id: string) => {
 
   return {
     id,
-    messages: messages.map((v) => ({ ...v, isMe: v.userId === userId })),
+    messages: messages.map((v) =>
+      typeof v === 'string' ? v : { ...v, isMe: v.userId === userId },
+    ),
     sendMessage,
   };
 };
 
 const ChatBubble = (
-  message: ReturnType<typeof useRoom>['messages'][number],
+  message: Exclude<ReturnType<typeof useRoom>['messages'][number], string>,
 ) => {
   return (
     <div className={`flex gap-2` + (message.isMe ? ' justify-end' : '')}>
@@ -57,9 +59,17 @@ const ChatRoomPage = () => {
       <h1 className="text-2xl font-bold">Chat Room</h1>
       <div className="border border-black flex-1 p-2 flex flex-col gap-2 h-0">
         <div className="flex flex-1 flex-col-reverse border border-black p-2 gap-2 overflow-y-scroll">
-          {messages.toReversed().map((message) => (
-            <ChatBubble key={message.id} {...message} />
-          ))}
+          {messages
+            .toReversed()
+            .map((message) =>
+              message === 'joined' ? (
+                <div className="self-center text-gray-400">- user joined -</div>
+              ) : message === 'left' ? (
+                <div className="self-center text-gray-400">- user left -</div>
+              ) : (
+                <ChatBubble key={message.id} {...message} />
+              ),
+            )}
           <div className="self-center text-gray-400">
             - enter message below to send -
           </div>

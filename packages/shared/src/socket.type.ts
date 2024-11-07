@@ -8,6 +8,8 @@ export type ListResponse = RoomSummary[];
 export interface ServerToClientEvents {
   created: (data: RoomSummary) => void;
   message: (data: Message) => void;
+  joined: () => void;
+  left: () => void;
 }
 
 export interface ClientToServerEvents {

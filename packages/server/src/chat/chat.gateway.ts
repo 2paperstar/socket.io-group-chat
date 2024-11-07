@@ -48,6 +48,7 @@ export class ChatGateway {
     @MessageBody() id: string,
   ): Message[] {
     client.join(`room:${id}`);
+    client.in(`room:${id}`).emit('joined');
     return this.chatRepository.getMessages(id);
   }
 
@@ -56,6 +57,7 @@ export class ChatGateway {
     client.rooms.forEach((room) => {
       if (room.startsWith('room:')) {
         client.leave(room);
+        client.in(room).emit('left');
       }
     });
   }
