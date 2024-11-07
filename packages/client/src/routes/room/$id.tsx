@@ -1,11 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useSocket } from '../../hooks/useSocket';
-import { useEffect } from 'react';
-import { FaPaperPlane } from 'react-icons/fa6';
-import { Message } from 'shared';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { createFileRoute } from '@tanstack/react-router';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { FaPaperPlane } from 'react-icons/fa6';
+import { z } from 'zod';
+import { useSocket } from '../../hooks/useSocket';
 
 const useRoom = (id: string) => {
   const { joinRoom, leaveRoom, messages, sendMessage, userId } = useSocket();
