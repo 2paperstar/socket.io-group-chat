@@ -47,7 +47,7 @@ export const SocketProvider = (props: PropsWithChildren) => {
     );
 
   return (
-    <div className="grid place-items-center">
+    <div className="grid place-items-center h-screen">
       <div className="flex flex-col gap-4">
         <h1 className="font-bold text-4xl">Enter your information</h1>
         <form onSubmit={handleSubmit(onSubmit)} className="flex gap-2">
