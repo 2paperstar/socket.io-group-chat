@@ -1,6 +1,8 @@
 import {
   ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -9,6 +11,7 @@ import {
   ClientToServerEvents,
   ListResponse,
   Message,
+  MessageOnServer,
   RoomCreation,
   ServerToClientEvents,
   SocketData,
@@ -24,11 +27,16 @@ type Client = Socket<
 >;
 
 @WebSocketGateway({ cors: { origin: '*' } })
-export class ChatGateway {
+export class ChatGateway implements OnGatewayConnection {
   constructor(private readonly chatRepository: ChatRepository) {}
 
   @WebSocketServer()
   server: Server<ClientToServerEvents, ServerToClientEvents, {}, SocketData>;
+
+  handleConnection(client: Client) {
+    client.data.userId = client.id;
+    client.data.userName = client.handshake.query.userName.toString();
+  }
 
   @SubscribeMessage('list')
   list(): ListResponse {
@@ -46,10 +54,13 @@ export class ChatGateway {
   join(
     @ConnectedSocket() client: Client,
     @MessageBody() id: string,
-  ): Message[] {
+  ): MessageOnServer[] {
     client.join(`room:${id}`);
     client.in(`room:${id}`).emit('joined');
-    return this.chatRepository.getMessages(id);
+    return this.chatRepository.getMessages(id).map((v) => ({
+      ...v,
+      userName: this.server.sockets.sockets.get(v.userId).data.userName,
+    }));
   }
 
   @SubscribeMessage('leave')
@@ -66,16 +77,15 @@ export class ChatGateway {
   message(
     @ConnectedSocket() client: Client,
     @MessageBody() content: string,
-  ): Message {
+  ): MessageOnServer {
     const room = [...client.rooms].find((room) => room.startsWith('room:'));
     if (!room) {
       throw new Error('Not in a room');
     }
-    const message = this.chatRepository.message(
-      client.id,
-      room.slice(5),
-      content,
-    );
+    const message = {
+      ...this.chatRepository.message(client.id, room.slice(5), content),
+      userName: client.data.userName,
+    };
     client.to(room).emit('message', message);
     return message;
   }

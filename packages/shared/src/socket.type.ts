@@ -1,13 +1,15 @@
-import { Message } from 'message.type';
-import { Room } from 'room.type';
+import { Message } from './message.type';
+import { Room } from './room.type';
 
 export type RoomCreation = Pick<Room, 'name' | 'description'>;
 export type RoomSummary = Pick<Room, 'id' | 'name' | 'description'>;
 export type ListResponse = RoomSummary[];
 
+export type MessageOnServer = Message & SocketData;
+
 export interface ServerToClientEvents {
   created: (data: RoomSummary) => void;
-  message: (data: Message) => void;
+  message: (data: MessageOnServer) => void;
   joined: () => void;
   left: () => void;
 }
@@ -15,11 +17,12 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   list: (cb: (data: ListResponse) => void) => void;
   create: (data: RoomCreation, cb: (data: RoomSummary) => void) => void;
-  join: (id: string, cb: (messages: Message[]) => void) => void;
+  join: (id: string, cb: (messages: MessageOnServer[]) => void) => void;
   leave: () => void;
-  send: (content: string, cb: (message: Message) => void) => void;
+  send: (content: string, cb: (message: MessageOnServer) => void) => void;
 }
 
 export interface SocketData {
   userId: string;
+  userName: string;
 }
