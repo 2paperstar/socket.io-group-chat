@@ -28,8 +28,8 @@ export const SocketProvider = (props: PropsWithChildren) => {
 
   if (userName)
     return (
-      <div className="flex flex-col min-h-screen">
-        <div className="px-2 pt-1 flex justify-between ">
+      <div className="flex flex-col max-h-screen h-screen">
+        <div className="px-2 pt-1 flex justify-between items-center">
           <h1 className="text-lg font-bold">Welcome, {userName}</h1>
           <button
             className="bg-blue-500 text-white px-2 py-1 rounded"
@@ -40,14 +40,14 @@ export const SocketProvider = (props: PropsWithChildren) => {
             Logout
           </button>
         </div>
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col h-0">
           <Inner userName={userName} {...props} />
         </div>
       </div>
     );
 
   return (
-    <div className="grid place-items-center h-screen">
+    <div className="grid place-items-center">
       <div className="flex flex-col gap-4">
         <h1 className="font-bold text-4xl">Enter your information</h1>
         <form onSubmit={handleSubmit(onSubmit)} className="flex gap-2">
