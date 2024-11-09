@@ -6,11 +6,7 @@ const ListPage = () => {
   const { rooms } = useSocket();
 
   return (
-    <main className="flex min-h-screen flex-col p-2 gap-2">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Group Chat</h1>
-        <CreateRoomButton />
-      </div>
+    <main className="flex flex-1 flex-col p-2 gap-2">
       <div className="border border-black flex-1">
         {rooms.map((room) => (
           <div
@@ -28,6 +24,9 @@ const ListPage = () => {
             </Link>
           </div>
         ))}
+      </div>
+      <div className="flex justify-end items-center">
+        <CreateRoomButton />
       </div>
     </main>
   );

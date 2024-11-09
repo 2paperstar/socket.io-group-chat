@@ -15,7 +15,7 @@ import {
 } from 'shared';
 import { io, Socket } from 'socket.io-client';
 
-export const useSocketProvider = () => {
+export const useSocketProvider = ({ userName }: { userName: string }) => {
   const sioRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents>>();
   const [rooms, setRooms] = useState<ListResponse>([]);
   const [messages, setMessages] = useState<(Message | 'joined' | 'left')[]>([]);
@@ -23,7 +23,7 @@ export const useSocketProvider = () => {
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const sio = io('http://localhost:3000');
+    const sio = io('http://localhost:3000', { query: { userName } });
     sioRef.current = sio;
 
     sio.on('connect', () => {
@@ -84,6 +84,7 @@ export const useSocketProvider = () => {
     messages,
     sendMessage,
     userId,
+    userName,
   };
 };
 
