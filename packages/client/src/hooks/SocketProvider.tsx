@@ -37,7 +37,7 @@ export const SocketProvider = (props: PropsWithChildren) => {
               setUserName(undefined);
             }}
           >
-            Leave
+            Logout
           </button>
         </div>
         <div className="flex-1 flex flex-col">
@@ -58,7 +58,7 @@ export const SocketProvider = (props: PropsWithChildren) => {
             {...register('name')}
           />
           <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-            Join
+            Login
           </button>
         </form>
       </div>
