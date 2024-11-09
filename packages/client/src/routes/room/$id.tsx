@@ -11,8 +11,11 @@ const useRoom = (id: string) => {
   const { joinRoom, leaveRoom, messages, sendMessage, rooms } = useSocket();
 
   useEffect(() => {
-    joinRoom(id);
+    const timeout = setTimeout(() => {
+      joinRoom(id);
+    }, 50);
     return () => {
+      clearTimeout(timeout);
       leaveRoom();
     };
   }, [id]);
