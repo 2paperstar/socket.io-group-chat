@@ -56,7 +56,7 @@ export class ChatGateway implements OnGatewayConnection {
     @MessageBody() id: string,
   ): MessageOnServer[] {
     client.join(`room:${id}`);
-    client.in(`room:${id}`).emit('joined');
+    client.in(`room:${id}`).emit('joined', client.data);
     return this.chatRepository.getMessages(id).map((v) => ({
       ...v,
       userName: this.server.sockets.sockets.get(v.userId).data.userName,
@@ -68,7 +68,7 @@ export class ChatGateway implements OnGatewayConnection {
     client.rooms.forEach((room) => {
       if (room.startsWith('room:')) {
         client.leave(room);
-        client.in(room).emit('left');
+        client.in(room).emit('left', client.data);
       }
     });
   }

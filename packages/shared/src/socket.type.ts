@@ -10,8 +10,8 @@ export type MessageOnServer = Message & SocketData;
 export interface ServerToClientEvents {
   created: (data: RoomSummary) => void;
   message: (data: MessageOnServer) => void;
-  joined: () => void;
-  left: () => void;
+  joined: (data: SocketData) => void;
+  left: (data: SocketData) => void;
 }
 
 export interface ClientToServerEvents {
