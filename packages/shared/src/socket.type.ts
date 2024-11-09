@@ -5,7 +5,7 @@ export type RoomCreation = Pick<Room, 'name' | 'description'>;
 export type RoomSummary = Pick<Room, 'id' | 'name' | 'description'>;
 export type ListResponse = RoomSummary[];
 
-export type MessageOnServer = Message & SocketData;
+export type MessageOnServer = Message & SocketData & { isMe: boolean };
 
 export interface ServerToClientEvents {
   created: (data: RoomSummary) => void;

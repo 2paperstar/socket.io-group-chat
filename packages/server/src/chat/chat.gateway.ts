@@ -59,7 +59,8 @@ export class ChatGateway implements OnGatewayConnection {
     client.in(`room:${id}`).emit('joined', client.data);
     return this.chatRepository.getMessages(id).map((v) => ({
       ...v,
-      userName: this.server.sockets.sockets.get(v.userId).data.userName,
+      userName: this.server.sockets.sockets.get(v.userId)?.data.userName,
+      isMe: v.userId === client.id,
     }));
   }
 
@@ -85,8 +86,9 @@ export class ChatGateway implements OnGatewayConnection {
     const message = {
       ...this.chatRepository.message(client.id, room.slice(5), content),
       userName: client.data.userName,
+      isMe: false,
     };
     client.to(room).emit('message', message);
-    return message;
+    return { ...message, isMe: true };
   }
 }

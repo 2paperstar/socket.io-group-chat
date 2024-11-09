@@ -9,16 +9,21 @@ import {
 import {
   ClientToServerEvents,
   ListResponse,
-  Message,
+  MessageOnServer,
   RoomCreation,
   ServerToClientEvents,
+  SocketData,
 } from 'shared';
 import { io, Socket } from 'socket.io-client';
+
+type MessageOrEvent =
+  | (MessageOnServer & { type: 'message' })
+  | (({ type: 'joined' } | { type: 'left' }) & SocketData);
 
 export const useSocketProvider = ({ userName }: { userName: string }) => {
   const sioRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents>>();
   const [rooms, setRooms] = useState<ListResponse>([]);
-  const [messages, setMessages] = useState<(Message | 'joined' | 'left')[]>([]);
+  const [messages, setMessages] = useState<MessageOrEvent[]>([]);
   const currentRoom = useRef<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -30,7 +35,9 @@ export const useSocketProvider = ({ userName }: { userName: string }) => {
       setUserId(sio.id ?? null);
       sio.emit('list', setRooms);
       if (currentRoom.current) {
-        sioRef.current?.emit('join', currentRoom.current, setMessages);
+        sioRef.current?.emit('join', currentRoom.current, (ms) =>
+          setMessages(ms.map((v) => ({ ...v, type: 'message' }))),
+        );
       }
     });
     sio.on('created', (room) => setRooms((rooms) => [...rooms, room]));
@@ -50,15 +57,17 @@ export const useSocketProvider = ({ userName }: { userName: string }) => {
   const joinRoom = useCallback(async (id: string) => {
     currentRoom.current = id;
     sioRef.current?.on('message', (message) =>
-      setMessages((messages) => [...messages, message]),
+      setMessages((messages) => [...messages, { ...message, type: 'message' }]),
     );
-    sioRef.current?.on('joined', () =>
-      setMessages((messages) => [...messages, 'joined']),
+    sioRef.current?.on('joined', (user) =>
+      setMessages((messages) => [...messages, { type: 'joined', ...user }]),
     );
-    sioRef.current?.on('left', () =>
-      setMessages((messages) => [...messages, 'left']),
+    sioRef.current?.on('left', (user) =>
+      setMessages((messages) => [...messages, { type: 'left', ...user }]),
     );
-    sioRef.current?.emit('join', id, setMessages);
+    sioRef.current?.emit('join', id, (ms) =>
+      setMessages(ms.map((v) => ({ ...v, type: 'message' }))),
+    );
   }, []);
 
   const leaveRoom = useCallback(() => {
@@ -72,7 +81,7 @@ export const useSocketProvider = ({ userName }: { userName: string }) => {
 
   const sendMessage = useCallback(async (content: string) => {
     sioRef.current?.emit('send', content, (message) =>
-      setMessages((messages) => [...messages, message]),
+      setMessages((messages) => [...messages, { ...message, type: 'message' }]),
     );
   }, []);
 

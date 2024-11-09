@@ -5,9 +5,10 @@ import { useForm } from 'react-hook-form';
 import { FaPaperPlane } from 'react-icons/fa6';
 import { z } from 'zod';
 import { useSocket } from '../../hooks/useSocket';
+import { MessageOnServer } from 'shared';
 
 const useRoom = (id: string) => {
-  const { joinRoom, leaveRoom, messages, sendMessage, userId } = useSocket();
+  const { joinRoom, leaveRoom, messages, sendMessage } = useSocket();
 
   useEffect(() => {
     joinRoom(id);
@@ -18,20 +19,18 @@ const useRoom = (id: string) => {
 
   return {
     id,
-    messages: messages.map((v) =>
-      typeof v === 'string' ? v : { ...v, isMe: v.userId === userId },
-    ),
+    messages,
     sendMessage,
   };
 };
 
-const ChatBubble = (
-  message: Exclude<ReturnType<typeof useRoom>['messages'][number], string>,
-) => {
+const ChatBubble = (message: MessageOnServer) => {
   return (
     <div className={`flex gap-2` + (message.isMe ? ' justify-end' : '')}>
       <div className="bg-blue-200 text-black py-1 px-2 rounded">
-        {message.content}
+        {message.isMe
+          ? message.content
+          : `${message.userName}: ${message.content}`}
       </div>
     </div>
   );
@@ -54,17 +53,20 @@ const ChatRoomPage = () => {
   });
 
   return (
-    <main className="flex min-h-screen flex-col p-2 gap-2 max-h-screen">
-      <h1 className="text-2xl font-bold">Chat Room</h1>
+    <main className="flex flex-col p-2 gap-2 flex-1 h-0">
       <div className="border border-black flex-1 p-2 flex flex-col gap-2 h-0">
         <div className="flex flex-1 flex-col-reverse border border-black p-2 gap-2 overflow-y-scroll">
           {messages
             .toReversed()
             .map((message) =>
-              message === 'joined' ? (
-                <div className="self-center text-gray-400">- user joined -</div>
-              ) : message === 'left' ? (
-                <div className="self-center text-gray-400">- user left -</div>
+              message.type === 'joined' ? (
+                <div className="self-center text-gray-400">
+                  - '{message.userName}' joined -
+                </div>
+              ) : message.type === 'left' ? (
+                <div className="self-center text-gray-400">
+                  - '{message.userName}' left -
+                </div>
               ) : (
                 <ChatBubble key={message.id} {...message} />
               ),
